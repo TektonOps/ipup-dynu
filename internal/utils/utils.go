@@ -25,7 +25,16 @@ func AppInfo(version, buildDate, commit, logLevel string) {
 	reset := "\x1b[0m"
 
 	banner := `
-	ＩＰｕｐ  Ｄｙｎｕ					  
+━━┏━━━┓┏┓━┏┓━━━━
+━━┃┏━┓┃┃┃━┃┃━━━━
+┏┓┃┗━┛┃┃┃━┃┃┏━━┓
+┣┫┃┏━━┛┃┃━┃┃┃┏┓┃
+┃┃┃┃━━━┃┗━┛┃┃┗┛┃
+┗┛┗┛━━━┗━━━┛┃┏━┛
+━━━━━━━━━━━━┃┃━━
+━━━━━━━━━━━━┗┛━━
+  
+
 	`
 	fmt.Println(cyan + banner + reset)
 
