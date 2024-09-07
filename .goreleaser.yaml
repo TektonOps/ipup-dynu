@@ -1,0 +1,75 @@
+env:
+  - GO111MODULE=on
+before:
+  hooks:
+    - go mod tidy
+gomod:
+  proxy: false
+
+
+builds:
+- main: ./main.go
+  env:
+    - CGO_ENABLED=0
+  goos:
+    - linux
+  goarch:
+    - amd64
+    - arm
+    - arm64
+  goarm:
+    - "7"
+  mod_timestamp: '{{ .CommitTimestamp }}'
+  flags:
+    - -trimpath
+  ldflags:
+    - -s -w -X main.version={{ .Version }} -X main.commitSha={{.Commit}} -X main.buildDate={{ .Date }}
+checksum:
+  name_template: '{{ .ProjectName }}_checksums.txt'
+
+changelog:
+  sort: 'asc'
+  filters:
+    exclude: ['^docs:', '^test:', 'Merge pull request', 'Merge branch', 'go mod tidy']
+
+archives:
+  - name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+
+
+dockers:
+- image_templates:
+  - 'tektonops/ipup-dynu:{{ .Tag }}-amd64'
+  dockerfile: Dockerfile
+  use: buildx
+  build_flag_templates:
+  - "--pull"
+  - "--label=org.opencontainers.image.created={{.Date}}"
+  - "--label=org.opencontainers.image.name={{.ProjectName}}"
+  - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+  - "--label=org.opencontainers.image.version={{.Version}}"
+  - "--label=org.opencontainers.image.source={{.GitURL}}"
+  - "--platform=linux/amd64"
+- image_templates:
+  - 'tektonops/ipup-dynu:{{ .Tag }}-arm64'
+  dockerfile: Dockerfile
+  use: buildx
+  build_flag_templates:
+  - "--pull"
+  - "--label=org.opencontainers.image.created={{.Date}}"
+  - "--label=org.opencontainers.image.name={{.ProjectName}}"
+  - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+  - "--label=org.opencontainers.image.version={{.Version}}"
+  - "--label=org.opencontainers.image.source={{.GitURL}}"
+  - "--platform=linux/arm64/v8"
+  goarch: arm64
+
+docker_manifests:
+- name_template: 'tektonops/ipup-dynu:{{ .Tag }}'
+  image_templates:
+  - 'tektonops/ipup-dynu:{{ .Tag }}-amd64'
+  - 'tektonops/ipup-dynu:{{ .Tag }}-arm64'
+- name_template: 'tektonops/ipup-dynu:latest'
+  image_templates:
+  - 'tektonops/ipup-dynu:{{ .Tag }}-amd64'
+  - 'tektonops/ipup-dynu:{{ .Tag }}-arm64'
+
